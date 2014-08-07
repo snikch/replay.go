@@ -66,13 +66,16 @@ func (p *Processor) ProcessQueries(queries []Query) error {
 		if err != nil {
 			return err
 		}
+		log.Printf("Added %f for processing\n", query.Score)
+		// Avoid any truncation issues on the score by ensuring it is rounded up.
+		p.lastScore = query.Score + 0.0000006
 	}
 	return nil
 }
 
 func (p *Processor) GetQueries() ([]Query, error) {
 	score := redis.ZRangeByScore{
-		Min:   fmt.Sprintf("(%f", p.lastScore),
+		Min:   fmt.Sprintf("%f", p.lastScore),
 		Max:   "+inf",
 		Count: MAX_QUERIES_PER_GET,
 	}
@@ -96,8 +99,12 @@ func (p *Processor) GetQueries() ([]Query, error) {
 func (p *Processor) GetConnection(connection_id int64) *Connection {
 	connection, ok := p.Connections[connection_id]
 	if !ok {
-		connection = newConnection()
+		connection = newConnection(connection_id)
 		p.Connections[connection_id] = connection
 	}
 	return connection
+}
+
+func (p *Processor) SetConnection(connection_id int64, connection *Connection) {
+	p.Connections[connection_id] = connection
 }

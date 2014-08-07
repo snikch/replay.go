@@ -1,16 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
+	"sync"
 	"syscall"
 )
 
 func main() {
-	start := 0.0
+	startString := os.Getenv("START_SCORE")
+	if startString == "" {
+		log.Fatal(fmt.Errorf("No START_SCORE defined"))
+	}
+
+	start, err := strconv.ParseFloat(startString, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Starting from score %f", start)
 
 	processor := newProcessor(start)
+	primaryQueue.Processor = processor
 
 	go func() {
 		err := processor.Run()
@@ -19,8 +33,30 @@ func main() {
 		}
 	}()
 
+	go func() {
+		err := primaryQueue.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	waitForShutdown()
-	processor.Stop()
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		processor.Stop()
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		primaryQueue.Stop()
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
 
 func waitForShutdown() {

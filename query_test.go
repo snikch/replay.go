@@ -2,46 +2,51 @@ package main
 
 import "testing"
 
-func TestQueryTransactionStartTrue(t *testing.T) {
+func TestQueryTransactionBeginTrue(t *testing.T) {
 	q := Query{
 		Sql: "BEGIN",
 	}
-	if !q.TransactionStart() {
-		t.Errorf("Expected TransactionStart for %s to be true", q.Sql)
+	if !q.TransactionBegin() {
+		t.Errorf("Expected TransactionBegin for %s to be true", q.Sql)
 	}
 }
 
-func TestQueryTransactionStartFalse(t *testing.T) {
+func TestQueryTransactionBeginFalse(t *testing.T) {
 	q := Query{
 		Sql: "NOT BEGIN",
 	}
-	if q.TransactionStart() {
-		t.Errorf("Expected TransactionStart for %s to be false", q.Sql)
+	if q.TransactionBegin() {
+		t.Errorf("Expected TransactionBegin for %s to be false", q.Sql)
 	}
 }
 
-func TestQueryTransactionEndTrue(t *testing.T) {
+func TestQueryTransactionCommitTrue(t *testing.T) {
 	q := Query{
 		Sql: "COMMIT",
 	}
-	if !q.TransactionEnd() {
-		t.Errorf("Expected TransactionEnd for %s to be true", q.Sql)
-	}
-	q.Sql = "ROLLBACK"
-	if !q.TransactionEnd() {
-		t.Errorf("Expected TransactionEnd for %s to be true", q.Sql)
-	}
-	q.Sql = "  ROLLBACK"
-	if !q.TransactionEnd() {
-		t.Errorf("Expected TransactionEnd for %s to be true", q.Sql)
+	if !q.TransactionCommit() {
+		t.Errorf("Expected TransactionCommit for %s to be true", q.Sql)
 	}
 }
 
-func TestQueryTransactionEndFalse(t *testing.T) {
+func TestQueryTransactionCommitFalse(t *testing.T) {
 	q := Query{
-		Sql: "NOT ROLLBACK OR COMMIT",
+		Sql: "NOT COMMIT ",
 	}
-	if q.TransactionEnd() {
-		t.Errorf("Expected TransactionEnd for %s to be false", q.Sql)
+	if q.TransactionCommit() {
+		t.Errorf("Expected TransactionCommit for %s to be false", q.Sql)
+	}
+}
+
+func TestQueryTransactionRollbackTrue(t *testing.T) {
+	q := Query{
+		Sql: "ROLLBACK",
+	}
+	if !q.TransactionRollback() {
+		t.Errorf("Expected TransactionRollback for %s to be true", q.Sql)
+	}
+	q.Sql = "  ROLLBACK"
+	if !q.TransactionRollback() {
+		t.Errorf("Expected TransactionRollback for %s to be true", q.Sql)
 	}
 }

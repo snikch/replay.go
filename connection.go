@@ -1,14 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type Connection struct {
+	Id           int64
 	Transactions map[string]*Transaction
+	Conn         *sql.DB
 }
 
-func newConnection() *Connection {
+func newConnection(id int64) *Connection {
 	return &Connection{
 		Transactions: map[string]*Transaction{},
+		Conn:         Postgres,
+		Id:           id,
 	}
 }
 
@@ -17,17 +24,17 @@ func (c *Connection) ProcessQuery(query Query) error {
 	transaction := c.GetTransaction(query.TransactionId)
 
 	// Check if this is the start
-	if query.TransactionStart() {
+	if query.TransactionBegin() {
 		// Add the query to the transaction set started
 		err := transaction.Start(query)
 		if err != nil {
 			return err
 		}
 		// Check if this is the end of the trnasaction
-	} else if query.TransactionEnd() {
+	} else if query.TransactionCommit() {
 		// Error if the transaction isn't running
 		if !transaction.Started {
-			return fmt.Errorf("Attempted to finish transaction that isn't running : %s", query)
+			return fmt.Errorf("Attempted to finish transaction that isn't running (%f): %s", query.Sql, query.Score)
 		}
 		// Finish the transaction
 		err := transaction.Add(query)
@@ -35,7 +42,9 @@ func (c *Connection) ProcessQuery(query Query) error {
 			return err
 		}
 		c.FlushTransaction(transaction)
-	} else {
+	} else if query.TransactionRollback() {
+		transaction.Rollback()
+	}else{
 		// If the transaction is running, add this to it
 		if transaction.Started {
 			err := transaction.Add(query)
@@ -53,6 +62,7 @@ func (c *Connection) ProcessQuery(query Query) error {
 	}
 	return nil
 }
+
 func (c *Connection) GetTransaction(transaction_id string) *Transaction {
 	transaction, ok := c.Transactions[transaction_id]
 	if !ok {
@@ -66,6 +76,6 @@ func (c *Connection) GetTransaction(transaction_id string) *Transaction {
 // the memoized transaction from the current connection, as transaction ids
 // are heavily reused.
 func (c *Connection) FlushTransaction(transaction *Transaction) {
-	primaryQueue.AddTransaction(transaction)
+	transaction.Finish()
 	delete(c.Transactions, transaction.Id)
 }

@@ -48,3 +48,16 @@ func (t *Transaction) Finish() error {
 	t.Complete = true
 	return nil
 }
+
+func (t *Transaction) Rollback() error {
+	if !t.Started {
+		return fmt.Errorf("Attempting to rollback a non running transaction")
+	}
+	if t.Complete {
+		return fmt.Errorf("Attempting to rollback an already complete transaction")
+	}
+	t.Complete = false
+	t.Started = false
+	t.Queries = []Query{}
+	return nil
+}
