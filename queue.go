@@ -68,6 +68,19 @@ func (q *Queue) AddTransaction(transaction *Transaction) {
 	q.TransactionsMutex.Unlock()
 }
 
+func (q *Queue) RemoveTransaction(transaction *Transaction) {
+	for i, tran := range q.Transactions {
+		if tran.Id != transaction.Id {
+			continue
+		}
+
+		q.TransactionsMutex.Lock()
+		q.Transactions = append(q.Transactions[:i], q.Transactions[i+1:]...)
+		q.TransactionsMutex.Unlock()
+		break
+	}
+}
+
 func (q *Queue) FlushTransactions() {
 	q.TransactionsMutex.Lock()
 	if len(q.Transactions) > 0 {

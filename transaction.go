@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 type Transaction struct {
 	Id        string
@@ -56,8 +59,7 @@ func (t *Transaction) Rollback() error {
 	if t.Complete {
 		return fmt.Errorf("Attempting to rollback an already complete transaction")
 	}
-	t.Complete = false
-	t.Started = false
-	t.Queries = []Query{}
+	primaryQueue.RemoveTransaction(t)
+	log.Printf("Removing rolled back transaction")
 	return nil
 }

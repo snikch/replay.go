@@ -42,9 +42,13 @@ func (c *Connection) ProcessQuery(query Query) error {
 			return err
 		}
 		c.FlushTransaction(transaction)
+		// Check if this is a rollback command
 	} else if query.TransactionRollback() {
+		// Remove the transaction from the queue
 		transaction.Rollback()
-	}else{
+		// Remove the transaction from the connection
+		delete(c.Transactions, transaction.Id)
+	} else {
 		// If the transaction is running, add this to it
 		if transaction.Started {
 			err := transaction.Add(query)
