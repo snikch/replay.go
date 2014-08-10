@@ -59,8 +59,9 @@ func (t *Transaction) Rollback() error {
 	if t.Complete {
 		return fmt.Errorf("Attempting to rollback an already complete transaction")
 	}
-	primaryQueue.RemoveTransaction(t)
+	t.Queries = []Query{}
 	t.Started = false
+	primaryQueue.RemoveTransaction(t)
 	log.Printf("Removing rolled back transaction")
 	return nil
 }
