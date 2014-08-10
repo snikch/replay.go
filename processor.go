@@ -46,7 +46,7 @@ LOOP:
 			}
 			// Immediately continue if we had queries
 			if len(queries) > 0 {
-				timer.Reset(0 * time.Second)
+				timer.Reset(10 * time.Millisecond)
 			} else {
 				timer.Reset(5 * time.Second)
 			}
