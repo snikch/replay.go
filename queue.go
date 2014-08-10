@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
 var primaryQueue *Queue
@@ -20,7 +19,6 @@ type Queue struct {
 	Queries           []Query
 	TransactionsMutex sync.Mutex
 	QueryMutex        sync.Mutex
-	stopChan          chan bool
 }
 
 func newQueue() *Queue {
@@ -29,36 +27,7 @@ func newQueue() *Queue {
 		TransactionsMutex: sync.Mutex{},
 		Queries:           []Query{},
 		QueryMutex:        sync.Mutex{},
-		stopChan:          make(chan bool),
 	}
-}
-
-func (q *Queue) Run() error {
-	transactionTimer := time.NewTimer(0 * time.Second)
-	queryTimer := time.NewTimer(1 * time.Second)
-LOOP:
-	for {
-		select {
-		case <-q.stopChan:
-			break LOOP
-		case <-transactionTimer.C:
-			q.FlushTransactions()
-			transactionTimer.Reset(1 * time.Second)
-			break
-		case <-queryTimer.C:
-			err := q.FlushQueries()
-			if err != nil {
-				return err
-			}
-			queryTimer.Reset(1 * time.Second)
-			break
-		}
-	}
-	return nil
-}
-
-func (q *Queue) Stop() {
-	q.stopChan <- true
 }
 
 func (q *Queue) AddTransaction(transaction *Transaction) {

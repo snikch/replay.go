@@ -33,13 +33,6 @@ func main() {
 		}
 	}()
 
-	go func() {
-		err := primaryQueue.Run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	waitForShutdown()
 
 	wg := sync.WaitGroup{}
@@ -47,12 +40,6 @@ func main() {
 	wg.Add(1)
 	go func() {
 		processor.Stop()
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		primaryQueue.Stop()
 		wg.Done()
 	}()
 
