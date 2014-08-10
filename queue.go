@@ -37,22 +37,16 @@ func (q *Queue) AddTransaction(transaction *Transaction) {
 	q.TransactionsMutex.Unlock()
 }
 
-func (q *Queue) RemoveTransaction(transaction *Transaction) {
-	removed := false
+func (q *Queue) RemoveUnstartedTransactions() {
 	q.TransactionsMutex.Lock()
-	for i, tran := range q.Transactions {
-		if tran.Id != transaction.Id {
-			continue
+	out := []*Transaction{}
+	for _, transaction := range q.Transactions {
+		if transaction.Started {
+			out = append(out, transaction)
 		}
-
-		q.Transactions = append(q.Transactions[:i], q.Transactions[i+1:]...)
-		removed = true
-		break
 	}
+	q.Transactions = out
 	q.TransactionsMutex.Unlock()
-	if removed == false {
-		log.Printf("!!Attempted to remove Transaction %s, but it wasn't in the list")
-	}
 }
 
 func (q *Queue) FlushTransactions() {

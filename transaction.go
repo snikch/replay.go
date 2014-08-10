@@ -61,7 +61,7 @@ func (t *Transaction) Rollback() error {
 	}
 	t.Queries = []Query{}
 	t.Started = false
-	primaryQueue.RemoveTransaction(t)
+	primaryQueue.RemoveUnstartedTransactions()
 	log.Printf("Removing rolled back transaction")
 	return nil
 }

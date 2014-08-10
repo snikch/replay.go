@@ -11,7 +11,7 @@ func TestQueueDeleteTransaction(t *testing.T) {
 	q.AddTransaction(t1)
 	q.AddTransaction(t2)
 	q.AddTransaction(t3)
-	q.RemoveTransaction(t2)
+	q.RemoveUnstartedTransactions()
 
 	if len(q.Transactions) != 2 {
 		t.Errorf("Expected transactions length to be 2, got %d", len(q.Transactions))
