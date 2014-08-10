@@ -69,15 +69,20 @@ func (q *Queue) AddTransaction(transaction *Transaction) {
 }
 
 func (q *Queue) RemoveTransaction(transaction *Transaction) {
+	removed := false
+	q.TransactionsMutex.Lock()
 	for i, tran := range q.Transactions {
 		if tran.Id != transaction.Id {
 			continue
 		}
 
-		q.TransactionsMutex.Lock()
 		q.Transactions = append(q.Transactions[:i], q.Transactions[i+1:]...)
-		q.TransactionsMutex.Unlock()
+		removed = true
 		break
+	}
+	q.TransactionsMutex.Unlock()
+	if removed == false {
+		log.Printf("!!Attempted to remove Transaction %s, but it wasn't in the list")
 	}
 }
 
@@ -93,6 +98,8 @@ func (q *Queue) FlushTransactions() {
 			q.QueryMutex.Unlock()
 			// Does this work?
 			defer q.FlushTransactions()
+		} else {
+			log.Printf("Incomplete current transaction %s", q.Transactions[0])
 		}
 	}
 	q.TransactionsMutex.Unlock()
