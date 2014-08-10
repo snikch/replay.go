@@ -64,7 +64,7 @@ func (q *Queue) Stop() {
 func (q *Queue) AddTransaction(transaction *Transaction) {
 	q.TransactionsMutex.Lock()
 	q.Transactions = append(q.Transactions, transaction)
-	log.Printf("Adding transaction id %s at %s to queue, length is now %d", transaction.Id, transaction.Queries[0].Score, len(q.Transactions))
+	log.Printf("Adding transaction id %s at %f to queue, length is now %d", transaction.Id, transaction.Queries[0].Score, len(q.Transactions))
 	q.TransactionsMutex.Unlock()
 }
 
