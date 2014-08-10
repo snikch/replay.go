@@ -81,5 +81,5 @@ func (c *Connection) GetTransaction(transaction_id string) *Transaction {
 // are heavily reused.
 func (c *Connection) FlushTransaction(transaction *Transaction) {
 	transaction.Finish()
-	delete(c.Transactions, transaction.Id)
+	c.Transactions[transaction.Id] = newTransaction(transaction.Id)
 }
