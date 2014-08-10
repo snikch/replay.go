@@ -47,7 +47,7 @@ func (c *Connection) ProcessQuery(query Query) error {
 		// Remove the transaction from the queue
 		transaction.Rollback()
 		// Remove the transaction from the connection
-		delete(c.Transactions, transaction.Id)
+		c.Transactions[transaction.Id] = newTransaction(transaction.Id)
 	} else {
 		// If the transaction is running, add this to it
 		if transaction.Started {
