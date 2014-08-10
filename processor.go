@@ -49,17 +49,17 @@ LOOP:
 			}
 			// Immediately continue if we had queries
 			if len(queries) > 0 {
-				t1.Reset(1 * time.Second)
+				t1.Reset(50 * time.Millisecond)
 			} else {
-				t1.Reset(5 * time.Second)
+				t1.Reset(1 * time.Second)
 			}
 			break
 		case <-t2.C:
 			primaryQueue.FlushTransactions()
-			t2.Reset(1 * time.Second)
+			t2.Reset(50 * time.Millisecond)
 		case <-t3.C:
 			primaryQueue.FlushQueries()
-			t3.Reset(1 * time.Second)
+			t3.Reset(50 * time.Millisecond)
 		}
 	}
 	return nil
