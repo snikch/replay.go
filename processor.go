@@ -66,7 +66,7 @@ func (p *Processor) ProcessQueries(queries []Query) error {
 		if err != nil {
 			return err
 		}
-		log.Printf("Added %f for processing\n", query.Score)
+		log.Printf("Added %s at %f for processing\n", query.TransactionId, query.Score)
 		// Avoid any truncation issues on the score by ensuring it is rounded up.
 		p.lastScore = query.Score + 0.0000006
 	}
