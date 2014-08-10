@@ -132,6 +132,14 @@ func (q *Queue) FlushQueries() error {
 				q.FlushQueries()
 				return nil
 			} else {
+				if len(q.Queries) > 1 {
+					nextQuery := q.Queries[1]
+					log.Printf(
+						"Error info: Next Query (%s): %s",
+						nextQuery.Score,
+						nextQuery.Sql,
+					)
+				}
 				log.Fatal(fmt.Errorf("Postgres error: %s", err))
 			}
 		}
